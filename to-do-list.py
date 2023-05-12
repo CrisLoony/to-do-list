@@ -1,27 +1,86 @@
-# class - Classes são moldes para criar novos objetos
-# As classes geram novos objetos (instâncias) que podem ter seus próprios atributos e métodos.
-# Os objetos gerados pela classe podem usar seus dados internos para realizar várias ações.
-# Por convenção, usamos PascalCase para nomes de classes.
+from os import system
+from time import sleep
+import json
 
-# string = 'Luiz' #str
-# print(string)
+def json_file():
+    with open('lista_de_tarefas.json', 'w', encoding='utf-8') as todo_json:
+        json.dump(todo,
+                  todo_json,
+                  ensure_ascii=False,
+                  indent=2)
 
-class Pessoa:
-    def __init__(self, nome, sobrenome):
-        self.nome = nome
-        self.sobrenome = sobrenome
+todo = []
+undo = []
+count = 1
+options = ('A', 'L', 'U', 'R')
+commands = '''Choose an option:
+[A] Add to the List
+[L] List
+[U] Undo
+[R] Redo '''
 
+print('-' * 40)
+print(f'|{"To Do List":^38}|')
 
-p1 = Pessoa('Luiz', 'Otávio')
-# p1.nome = 'Luiz'
-# p1.sobrenome = 'Otávio'
+while True:
+    print('-' * 40)
 
-p2 = Pessoa('Maria', 'Joana')
-# p2.nome = 'Maria'
-# p2.sobrenome = 'Joana'
+    if len(todo) != 0:
+        print(f'*' * 20)
+        print(f'|{"To Do List":^18}|')
+        print(f'*' * 20)
+        print(*todo, sep='\n')
+        print(f'*' * 20)
+    else:
+        print('\033[33mNothing to list.\033[m')
 
-print(p1.nome)
-print(p1.sobrenome)
+    print(commands)
+    option = input('-> ').upper().strip()
+    print('-' * 40)
 
-print(p2.nome)
-print(p2.sobrenome)
+    if option not in options:
+        while option not in options:
+            system('cls')
+            print("\033[31mThis isn't a valid choice. Try again:\033[m")
+            print()
+            print(commands)
+            option = input('-> ').upper()
+            print('-' * 40)
+            
+    if option == 'A':
+        item = input('Add on your to do list: ').capitalize()
+        todo.append(item)
+        print(f'\033[32m{item} was added successfully!\033[m')
+        json_file()
+        print()
+
+    elif option == 'L':
+        if len(todo) == 0:
+            print('\033[31mNothing to list.\033[m')
+        else:
+            continue
+
+    elif option == 'U':
+        if len(todo) == 0:
+            print('\033[31mNothing to undo.\033[m')
+
+        else:
+            print('\033[32mThe last item was deleted successfully!\033[m')
+            undo.append(todo.pop())
+            count -= 1
+            json_file()
+            print()
+
+    elif option == 'R':
+        if len(undo) == 0:
+            print('\033[31mNothing to redo.\033[m')
+        else:
+            redo_item = undo[-1]
+            todo.append(redo_item)
+            undo.pop()
+            print('\033[32mThe redo was executed successfully!\033[m')
+            json_file()
+            print()
+
+    sleep(1.5)
+    system('cls')
